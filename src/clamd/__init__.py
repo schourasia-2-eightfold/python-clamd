@@ -60,11 +60,10 @@ class ClamdNetworkSocket(object):
         internal use only
         """
         try:
-            self.clamd_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.clamd_socket.connect((self.host, self.port))
+            self.clamd_socket = socket.create_connection((self.host, self.port), self.timeout)
             self.clamd_socket.settimeout(self.timeout)
 
-        except socket.error:
+        except (socket.error, TimeoutError) as e:
             e = sys.exc_info()[1]
             raise ConnectionError(self._error_message(e))
 
@@ -200,8 +199,10 @@ class ClamdNetworkSocket(object):
 
                 filename, reason, status = self._parse_response(result)
                 return {filename: (status, reason)}
+
         finally:
-            self._close_socket()
+            if hasattr(self, 'clamd_socket'):
+                self._close_socket()
 
     def stats(self):
         """
