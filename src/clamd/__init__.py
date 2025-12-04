@@ -186,10 +186,10 @@ class ClamdNetworkSocket(object):
             chunk = buff.read(max_chunk_size)
             while chunk:
                 size = struct.pack(b'!L', len(chunk))
-                self.clamd_socket.send(size + chunk)
+                self.clamd_socket.sendall(size + chunk)
                 chunk = buff.read(max_chunk_size)
 
-            self.clamd_socket.send(struct.pack(b'!L', 0))
+            self.clamd_socket.sendall(struct.pack(b'!L', 0))
 
             result = self._recv_response()
 
